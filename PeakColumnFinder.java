@@ -1,4 +1,3 @@
-import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class PeakColumnFinder {
@@ -6,16 +5,18 @@ public class PeakColumnFinder {
         Scanner scanner = new Scanner(System.in);
         int rows = 0, cols = 0;
 
-        // Step 1: Input the dimensions of the matrix with validation (No spaces allowed)
-        rows = getValidatedInput(scanner, "Enter the number of rows for Matrix A: ");
-        cols = getValidatedInput(scanner, "Enter the number of columns for Matrix A: ");
+        // Step 1: Input the dimensions of the matrix with validation (Allow spaces or commas)
+        int[] dimensions = getValidatedDimensions(scanner, "Enter the dimensions (rows, columns) for Matrix A: ");
+        rows = dimensions[0];
+        cols = dimensions[1];
 
-        // Step 2: Initialize the matrix with input validation
+        // Step 2: Initialize the matrix with input validation for matrix elements
         int[][] matrix = new int[rows][cols];
-        System.out.println("Enter elements of Matrix A:");
+        System.out.println("Enter elements of Matrix A (row by row, separated by spaces or commas):");
         for (int i = 0; i < rows; i++) {
+            int[] rowValues = getRowValues(scanner, cols, "Row " + (i + 1) + ": ");
             for (int j = 0; j < cols; j++) {
-                matrix[i][j] = getValidatedInput(scanner, "A[" + (i + 1) + "][" + (j + 1) + "]: ");
+                matrix[i][j] = rowValues[j];
             }
         }
 
@@ -39,17 +40,46 @@ public class PeakColumnFinder {
         scanner.close();
     }
 
-    // Method to validate input (No spaces allowed)
-    private static int getValidatedInput(Scanner scanner, String prompt) {
+    // Method to validate matrix dimensions input (Allows space or comma as a separator)
+    private static int[] getValidatedDimensions(Scanner scanner, String prompt) {
         while (true) {
             System.out.print(prompt);
-            String input = scanner.nextLine().trim(); // Read input as a string and trim spaces
+            String input = scanner.nextLine().trim();
 
-            // Check if input contains only digits (no spaces or other characters)
-            if (input.matches("\\d+")) {
-                return Integer.parseInt(input);
+            // Split input by space or comma
+            String[] parts = input.split("[,\\s]+");
+
+            if (parts.length == 2 && parts[0].matches("\\d+") && parts[1].matches("\\d+")) {
+                int rows = Integer.parseInt(parts[0]);
+                int cols = Integer.parseInt(parts[1]);
+                return new int[]{rows, cols};
             } else {
-                System.out.println("Invalid input. Please enter a positive integer with no spaces.");
+                System.out.println("Invalid input. Please enter two integers separated by a space or comma.");
+            }
+        }
+    }
+
+    // Method to get row values (Allows space or comma as a separator)
+    private static int[] getRowValues(Scanner scanner, int expectedCols, String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            String input = scanner.nextLine().trim();
+
+            // Split input by space or comma
+            String[] parts = input.split("[,\\s]+");
+
+            if (parts.length == expectedCols) {
+                int[] rowValues = new int[expectedCols];
+                try {
+                    for (int i = 0; i < expectedCols; i++) {
+                        rowValues[i] = Integer.parseInt(parts[i]);
+                    }
+                    return rowValues;
+                } catch (NumberFormatException e) {
+                    System.out.println("Invalid input. Please enter " + expectedCols + " integers separated by spaces or commas.");
+                }
+            } else {
+                System.out.println("Invalid input. Please enter exactly " + expectedCols + " integers.");
             }
         }
     }
